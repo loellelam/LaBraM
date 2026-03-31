@@ -3,6 +3,28 @@ import mne
 import numpy as np
 
 
+def preprocessing_set(setFilePath, l_freq=0.1, h_freq=75.0, sfreq: int = 200):
+    # load EEGLAB (.set)
+    raw = mne.io.read_raw_eeglab(setFilePath, preload=True)
+
+    # drop non-EEG channels if present
+    drop_chs = []
+    for ch in ['M1', 'M2', 'VEO', 'HEO', 'ECG']:
+        if ch in raw.ch_names:
+            drop_chs.append(ch)
+    if drop_chs:
+        raw.drop_channels(drop_chs)
+
+    # filtering
+    raw = raw.filter(l_freq=l_freq, h_freq=h_freq)
+    raw = raw.notch_filter(50.0)
+    # downsampling
+    raw = raw.resample(sfreq, n_jobs=5)
+    eegData = raw.get_data(units='uV') # get data in microvolts
+
+    return eegData, raw.ch_names
+
+
 def preprocessing_cnt(cntFilePath, l_freq=0.1, h_freq=75.0, sfreq:int=200):
     # reading cnt
     raw = mne.io.read_raw_cnt(cntFilePath, preload=True, data_format='int32')

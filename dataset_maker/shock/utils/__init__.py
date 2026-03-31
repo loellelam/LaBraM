@@ -1,3 +1,3 @@
 from .ringBuffer import ringBuffer
-from .eegUtils import preprocessing_edf, preprocessing_cnt
+from .eegUtils import preprocessing_edf, preprocessing_cnt, preprocessing_set
 from .h5 import h5Dataset
