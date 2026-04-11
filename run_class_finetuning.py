@@ -32,6 +32,8 @@ import utils
 from scipy import interpolate
 import modeling_finetune
 
+from data_processor.AD import ADDataset
+
 def get_args():
     parser = argparse.ArgumentParser('LaBraM fine-tuning and evaluation script for EEG classification', add_help=False)
     parser.add_argument('--batch_size', default=64, type=int)
@@ -132,6 +134,10 @@ def get_args():
     # Dataset parameters
     parser.add_argument('--nb_classes', default=0, type=int,
                         help='number of the classification types')
+    parser.add_argument('--data_path', default='', type=str,
+                        help='path to dataset folder (used by AD dataset)')
+    parser.add_argument('--channel_names_path', default='', type=str,
+                        help='path to channel_names.json (used by AD dataset)')
 
     parser.add_argument('--output_dir', default='',
                         help='path where to save, empty for no saving')
@@ -225,6 +231,15 @@ def get_dataset(args):
         ch_names = [name.split(' ')[-1].split('-')[0] for name in ch_names]
         args.nb_classes = 6
         metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1_weighted"]
+    elif args.dataset == 'AD':
+        with open(args.channel_names_path) as f:
+            ch_names = json.load(f)
+        train_dataset = ADDataset(os.path.join(args.data_path, "train.h5"), ch_names)
+        val_dataset   = ADDataset(os.path.join(args.data_path, "val.h5"),   ch_names)
+        test_dataset  = ADDataset(os.path.join(args.data_path, "test.h5"),  ch_names)
+        args.nb_classes = 2
+        # metrics = ["accuracy", "balanced_accuracy", "roc_auc", "pr_auc"] # roc_auc and pr_auc are only supported by pyhealth's binary metrics function
+        metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1_weighted"]  # For multiclass, use the same metrics as TUEV
     return train_dataset, test_dataset, val_dataset, ch_names, metrics
 
 
@@ -336,7 +351,7 @@ def main(args, ds_init):
             checkpoint = torch.hub.load_state_dict_from_url(
                 args.finetune, map_location='cpu', check_hash=True)
         else:
-            checkpoint = torch.load(args.finetune, map_location='cpu')
+            checkpoint = torch.load(args.finetune, map_location='cpu', weights_only=False)
 
         print("Load ckpt from %s" % args.finetune)
         checkpoint_model = None
