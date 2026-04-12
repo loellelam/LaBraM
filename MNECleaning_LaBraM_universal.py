@@ -315,7 +315,7 @@ def preprocess_raw(raw: mne.io.BaseRaw) -> tuple[np.ndarray, list[str], int, np.
         verbose=False,
     )
 
-    X = epochs.get_data(copy=True).astype(np.float32)  # (n_windows, n_channels, n_times)
+    X = epochs.get_data().copy().astype(np.float32)  # (n_windows, n_channels, n_times)
     if X.shape[0] == 0:
         raise RuntimeError("No windows were created. Recording may be too short or fully rejected.")
 

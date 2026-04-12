@@ -1,4 +1,8 @@
 venv
 __pycache__
+
 data
 output
+labram_data/train.h5
+labram_data/val.h5
+labram_data/test.h5
