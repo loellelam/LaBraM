@@ -237,7 +237,7 @@ def get_dataset(args):
         train_dataset = ADDataset(os.path.join(args.data_path, "train.h5"), ch_names)
         val_dataset   = ADDataset(os.path.join(args.data_path, "val.h5"),   ch_names)
         test_dataset  = ADDataset(os.path.join(args.data_path, "test.h5"),  ch_names)
-        args.nb_classes = 2
+        args.nb_classes = 3
         # metrics = ["accuracy", "balanced_accuracy", "roc_auc", "pr_auc"] # roc_auc and pr_auc are only supported by pyhealth's binary metrics function
         metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1_weighted"]  # For multiclass, use the same metrics as TUEV
     return train_dataset, test_dataset, val_dataset, ch_names, metrics
@@ -510,8 +510,8 @@ def main(args, ds_init):
             print(f"Accuracy of the network on the {len(dataset_val)} val EEG: {val_stats['accuracy']:.2f}%")
             test_stats = evaluate(data_loader_test, model, device, header='Test:', ch_names=ch_names, metrics=metrics, is_binary=args.nb_classes == 1)
             print(f"Accuracy of the network on the {len(dataset_test)} test EEG: {test_stats['accuracy']:.2f}%")
-            
-            if max_accuracy < val_stats["accuracy"]:
+
+            if max_accuracy < val_stats["accuracy"]: # Check if we have a new best model based on validation accuracy
                 max_accuracy = val_stats["accuracy"]
                 if args.output_dir and args.save_ckpt:
                     utils.save_model(
