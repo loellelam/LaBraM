@@ -237,9 +237,15 @@ def get_dataset(args):
         train_dataset = ADDataset(os.path.join(args.data_path, "train.h5"), ch_names)
         val_dataset   = ADDataset(os.path.join(args.data_path, "val.h5"),   ch_names)
         test_dataset  = ADDataset(os.path.join(args.data_path, "test.h5"),  ch_names)
-        args.nb_classes = 3
+
+        # 2 classes: AD vs non-AD
+        args.nb_classes = 1
+        metrics = ["accuracy", "balanced_accuracy", "roc_auc", "pr_auc", "f1_weighted", "cohen_kappa"]  # For binary classification
+
+        # 3 classes: AD, FTD, Control
+        # args.nb_classes = 3
         # metrics = ["accuracy", "balanced_accuracy", "roc_auc", "pr_auc"] # roc_auc and pr_auc are only supported by pyhealth's binary metrics function
-        metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1_weighted"]  # For multiclass, use the same metrics as TUEV
+        # metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1_weighted"]  # For multiclass, use the same metrics as TUEV
     return train_dataset, test_dataset, val_dataset, ch_names, metrics
 
 

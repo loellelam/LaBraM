@@ -24,12 +24,20 @@ with open(PARTICIPANTS_TSV) as f:
     for row in reader:
         sub = row["participant_id"].replace("sub-", "")
         group = row["Group"].strip().upper()
+
+        # 2 classes: AD vs non-AD
         if group == "A":
-            subject_labels[sub] = 0   # AD
-        elif group == "F":
-            subject_labels[sub] = 1   # FTD
-        elif group == "C":
-            subject_labels[sub] = 2   # Control
+            subject_labels[sub] = 1 # AD
+        elif group in ("F", "C"):
+            subject_labels[sub] = 0 # non-AD
+        
+        # 3 classes: AD, FTD, Control
+        # if group == "A":
+        #     subject_labels[sub] = 0   # AD
+        # elif group == "F":
+        #     subject_labels[sub] = 1   # FTD
+        # elif group == "C":
+        #     subject_labels[sub] = 2   # Control
 
 # Load manifest to find per-subject H5 paths
 with open(MANIFEST_PATH) as f:
@@ -71,9 +79,11 @@ subjects = list(subject_data.keys())
 labels_per_subject = [subject_data[s][1] for s in subjects]
 
 print(f"\nTotal subjects: {len(subjects)}")
-print(f"  AD:      {sum(l == 0 for l in labels_per_subject)}")
-print(f"  FTD:     {sum(l == 1 for l in labels_per_subject)}")
-print(f"  Control: {sum(l == 2 for l in labels_per_subject)}")
+print(f"  non-AD:      {sum(l == 0 for l in labels_per_subject)}")
+print(f"  AD:     {sum(l == 1 for l in labels_per_subject)}")
+# print(f"  AD:      {sum(l == 0 for l in labels_per_subject)}")
+# print(f"  FTD:     {sum(l == 1 for l in labels_per_subject)}")
+# print(f"  Control: {sum(l == 2 for l in labels_per_subject)}")
 
 # 70% train / 15% val / 15% test, stratified by subject label
 subs_trainval, subs_test = train_test_split(
@@ -119,14 +129,18 @@ for split_name, X_split, y_split, subs in [
         f.create_dataset("y", data=y_split)
         # store which subjects are in this split for traceability
         f.attrs["subjects"] = json.dumps(subs)
-    ad_count = (y_split == 0).sum()
-    ftd_count = (y_split == 1).sum()
-    ctrl_count = (y_split == 2).sum()
+    nonad_count = (y_split == 0).sum()
+    ad_count = (y_split == 1).sum()
+    # ad_count = (y_split == 0).sum()
+    # ftd_count = (y_split == 1).sum()
+    # ctrl_count = (y_split == 2).sum()
     print(
         f"\n{split_name}: {len(y_split)} windows | "
+        f"non-AD={nonad_count} ({100*nonad_count/len(y_split):.1f}%) | "
         f"AD={ad_count} ({100*ad_count/len(y_split):.1f}%) | "
-        f"FTD={ftd_count} ({100*ftd_count/len(y_split):.1f}%) | "
-        f"Control={ctrl_count} ({100*ctrl_count/len(y_split):.1f}%)"
+        # f"AD={ad_count} ({100*ad_count/len(y_split):.1f}%) | "
+        # f"FTD={ftd_count} ({100*ftd_count/len(y_split):.1f}%) | "
+        # f"Control={ctrl_count} ({100*ctrl_count/len(y_split):.1f}%)"
     )
 with open(LABRAM_DATA_DIR / "channel_names.json", "w") as f:
     json.dump(all_channels, f)
@@ -137,7 +151,8 @@ split_meta = {
     "train_subjects": subs_train,
     "val_subjects": subs_val,
     "test_subjects": subs_test,
-    "label_map": {"0": "AD", "1": "FTD", "2": "Control"}
+    "label_map": {"0": "non-AD", "1": "AD"}
+    # "label_map": {"0": "AD", "1": "FTD", "2": "Control"}
 }
 with open(LABRAM_DATA_DIR / "split_info.json", "w") as f:
     json.dump(split_meta, f, indent=2)
