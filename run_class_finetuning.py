@@ -240,7 +240,7 @@ def get_dataset(args):
 
         # 2 classes: AD vs non-AD
         args.nb_classes = 1
-        metrics = ["accuracy", "balanced_accuracy", "roc_auc", "pr_auc", "f1_weighted", "cohen_kappa"]  # For binary classification
+        metrics = ["accuracy", "balanced_accuracy", "roc_auc", "pr_auc", "cohen_kappa"]  # For binary classification
 
         # 3 classes: AD, FTD, Control
         # args.nb_classes = 3
