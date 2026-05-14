@@ -3,6 +3,10 @@ __pycache__
 
 data
 output
+output_for_adftd
 labram_data/train.h5
 labram_data/val.h5
 labram_data/test.h5
+labram_data_adftd/train.h5
+labram_data_adftd/val.h5
+labram_data_adftd/test.h5

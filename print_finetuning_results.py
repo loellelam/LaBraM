@@ -3,7 +3,7 @@ from pathlib import Path
 
 # Check class balance in each split
 print("Class balance in each split:")
-label_map = {0: "AD", 1: "FTD", 2: "Control"}
+label_map = {0: "non-AD", 1: "AD"}
 for split in ['train', 'val', 'test']:
     with h5py.File(f'labram_data/{split}.h5', 'r') as f:
         y = f['y'][:]
@@ -43,9 +43,13 @@ print()
 print(f'  val_accuracy:          {best["val_accuracy"]:.4f}')
 print(f'  val_balanced_accuracy: {best["val_balanced_accuracy"]:.4f}')
 print(f'  val_cohen_kappa:       {best["val_cohen_kappa"]:.4f}')
-print(f'  val_f1_weighted:       {best["val_f1_weighted"]:.4f}')
+# print(f'  val_f1_weighted:       {best["val_f1_weighted"]:.4f}')
+print(f'  val_roc_auc:           {best["val_roc_auc"]:.4f}')
+print(f'  val_pr_auc:            {best["val_pr_auc"]:.4f}')
 print()
 print(f'  test_accuracy:          {best["test_accuracy"]:.4f}')
 print(f'  test_balanced_accuracy: {best["test_balanced_accuracy"]:.4f}')
 print(f'  test_cohen_kappa:       {best["test_cohen_kappa"]:.4f}')
-print(f'  test_f1_weighted:       {best["test_f1_weighted"]:.4f}')
+# print(f'  test_f1_weighted:       {best["test_f1_weighted"]:.4f}')
+print(f'  test_roc_auc:           {best["test_roc_auc"]:.4f}')
+print(f'  test_pr_auc:            {best["test_pr_auc"]:.4f}')

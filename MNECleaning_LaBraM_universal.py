@@ -23,7 +23,7 @@ custom LaBraM dataset loader.
 from __future__ import annotations
 
 import json
-import os
+import os, shutil
 from pathlib import Path
 from typing import Callable, Iterable
 
@@ -52,7 +52,8 @@ except Exception:
 # - a single EEG file
 # - a directory containing EEG files
 # - a BIDS root directory (set INPUT_MODE = "bids")
-INPUT_PATH = "data/"
+# INPUT_PATH = "data/caueeg-dataset/signal/edf"
+INPUT_PATH = "data/hackathon-subset"
 INPUT_MODE = "auto"   # "auto", "files", or "bids"
 OUT_DIR = "output"
 
@@ -63,7 +64,7 @@ BIDS_TASK = None       # e.g. "eyesclosed". Use None to process all tasks found.
 RESAMPLE_HZ = 200
 FMIN = 0.1
 FMAX = 75.0
-NOTCH_HZ = 50.0        # change to 50.0 if the recordings were made in a 50 Hz mains region
+NOTCH_HZ = 60.0        # change to 50.0 if the recordings were made in a 50 Hz mains region
 APPLY_AVERAGE_REFERENCE = False
 
 # Windowing
@@ -78,11 +79,11 @@ REJECT_PEAK_TO_PEAK_UV = 250.0
 # Leave as None to keep all EEG channels in the order provided by the file.
 CHANNELS_TO_KEEP = None
 # Example:
-# CHANNELS_TO_KEEP = [
-#     "FP1", "FP2", "F7", "F3", "FZ", "F4", "F8",
-#     "T3", "C3", "CZ", "C4", "T4",
-#     "T5", "P3", "PZ", "P4", "T6", "O1", "O2"
-# ]
+CHANNELS_TO_KEEP = [
+    "FP1", "FP2", "F7", "F3", "FZ", "F4", "F8",
+    "T3", "C3", "CZ", "C4", "T4",
+    "T5", "P3", "PZ", "P4", "T6", "O1", "O2"
+]
 
 # Common EEG extensions MNE can read with dedicated readers.
 
@@ -118,7 +119,7 @@ def normalize_channel_name(ch: str) -> str:
     for prefix in ("EEG ",):
         if ch.startswith(prefix):
             ch = ch[len(prefix):]
-    for suffix in ("-REF", "-LE"):
+    for suffix in ("-REF", "-LE", "-AVG"):
         if ch.endswith(suffix):
             ch = ch[: -len(suffix)]
     return ch
@@ -484,7 +485,10 @@ def detect_mode(input_path: str | Path) -> str:
 
 
 def main() -> None:
-    Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
+    # Make empty output directory
+    shutil.rmtree(OUT_DIR)
+    os.makedirs(OUT_DIR)
+
     mode = detect_mode(INPUT_PATH)
     print(f"INPUT_MODE resolved to: {mode}")
 
